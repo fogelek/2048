@@ -75,6 +75,15 @@ GameManager.prototype.addRandomTile = function () {
   }
 };
 
+GameManager.prototype.addDifficultTile = function () {
+  if (this.grid.cellsAvailable()) {
+    var value = Math.random() < 0.9 ? 2 : 4;
+    var tile = new Tile(this.grid.difficultAvailableCell(), value);
+
+    this.grid.insertTile(tile);
+  }
+};
+
 // Sends the updated grid to the actuator
 GameManager.prototype.actuate = function () {
   if (this.storageManager.getBestScore() < this.score) {
@@ -180,7 +189,7 @@ GameManager.prototype.move = function (direction) {
   });
 
   if (moved) {
-    this.addRandomTile();
+    this.addDifficultTile();
 
     if (!this.movesAvailable()) {
       this.over = true; // Game over!
