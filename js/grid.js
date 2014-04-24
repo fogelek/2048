@@ -3,6 +3,11 @@ function Grid(size, previousState) {
   this.cells = previousState ? this.fromState(previousState) : this.empty();
 }
 
+var gridDistance = function(tile1, tile2) {
+  return Math.abs(tile1.x-tile2.x) + Math.abs(tile1.y-tile2.y);
+};
+
+
 // Build a grid of the specified size
 Grid.prototype.empty = function () {
   var cells = [];
@@ -35,11 +40,50 @@ Grid.prototype.fromState = function (state) {
 
 // Find the first available random position
 Grid.prototype.randomAvailableCell = function () {
-  var cells = this.availableCells();
+    var cells = this.availableCells();
 
   if (cells.length) {
     return cells[Math.floor(Math.random() * cells.length)];
   }
+};
+
+Grid.prototype.difficultAvailableCell = function() {
+    var maxCells = null;
+    var maxVal = 0;
+    
+    // find cells with maximum value on board
+    this.eachCell(function (x, y, tile) {
+        if (tile) {
+            if (tile.value > maxVal) {
+                maxVal = tile.value;
+                maxCells = [];
+                maxCells.push(tile);
+            } else if (tile.value == maxVal) {
+                maxCells.push(tile);
+            }
+        }  
+    });
+    
+    // find shortest taxi paths between max and empty cells
+    var emptyCells = this.availableCells();
+    var minPath = 10; // for the longest available path on 4x4 board is 6
+    var cellPairs = null;
+    
+    maxCells.forEach(function(cell){
+        emptyCells.forEach(function(empty){
+            var dist = gridDistance (cell, empty);
+            var pair = {e: empty, m: cell};
+            if (dist < minPath) {
+                minPath = dist;
+                cellPairs = [];
+                cellPairs.push(pair);
+            } else if (dist == minPath) {
+                cellPairs.push(pair);
+            }
+        });
+    });
+    
+    return cellPairs[Math.floor(Math.random() * cellPairs.length)].e;
 };
 
 Grid.prototype.availableCells = function () {
