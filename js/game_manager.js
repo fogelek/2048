@@ -14,10 +14,10 @@ function GameManager(size, InputManager, Actuator, StorageManager) {
 }
 
 // Restart the game
-GameManager.prototype.restart = function () {
+GameManager.prototype.restart = function (config) {
   this.storageManager.clearGameState();
   this.actuator.continueGame(); // Clear the game won/lost message
-  this.setup();
+  this.setup(config);
 };
 
 // Keep playing after winning (allows going over 2048)
@@ -32,8 +32,14 @@ GameManager.prototype.isGameTerminated = function () {
 };
 
 // Set up the game
-GameManager.prototype.setup = function () {
+GameManager.prototype.setup = function (config) {
   var previousState = this.storageManager.getGameState();
+  var defaultConfig = {
+    maxTile: 4
+  };
+  for (var property in config){
+    defaultConfig[property] = config[property];
+  }
 
   // Reload the game from a previous game if present
   if (previousState) {
@@ -43,12 +49,14 @@ GameManager.prototype.setup = function () {
     this.over        = previousState.over;
     this.won         = previousState.won;
     this.keepPlaying = previousState.keepPlaying;
+	this.config      = previousState.config;
   } else {
     this.grid        = new Grid(this.size);
     this.score       = 0;
     this.over        = false;
     this.won         = false;
     this.keepPlaying = false;
+	this.config      = defaultConfig;
 
     // Add the initial tiles
     this.addStartTiles();
@@ -72,9 +80,12 @@ GameManager.prototype.addStartTiles = function () {
 // Adds a tile in a random position
 GameManager.prototype.addRandomTile = function () {
   if (this.grid.cellsAvailable()) {
-    var valueArr = [2,4,8,16];
+    var valueArr = [2];
+    while (valueArr[valueArr.length-1] < this.config.maxTile) {
+        valueArr.push(valueArr[valueArr.length-1]*2);
+    }
 	var value = valueArr[Math.round(Math.random()*(valueArr.length-1))];
-    var tile = new Tile(, value);
+	var tile = new Tile(this.grid.randomAvailableCell(), value);
 
     this.grid.insertTile(tile);
   }
@@ -119,7 +130,8 @@ GameManager.prototype.serialize = function () {
     score:       this.score,
     over:        this.over,
     won:         this.won,
-    keepPlaying: this.keepPlaying
+    keepPlaying: this.keepPlaying,
+	config:      this.config
   };
 };
 
