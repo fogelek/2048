@@ -58,6 +58,10 @@ GameManager.prototype.setup = function () {
   this.actuate();
 };
 
+// GameManager.prototype.getRandomTile = function(bool closeTile, int maxTile) {
+	// var cell = closeTile ? this.grid.randomAvailableCell()
+// };
+
 // Set up the initial tiles to start the game with
 GameManager.prototype.addStartTiles = function () {
   for (var i = 0; i < this.startTiles; i++) {
@@ -68,8 +72,9 @@ GameManager.prototype.addStartTiles = function () {
 // Adds a tile in a random position
 GameManager.prototype.addRandomTile = function () {
   if (this.grid.cellsAvailable()) {
-    var value = Math.random() < 0.9 ? 2 : 4;
-    var tile = new Tile(this.grid.randomAvailableCell(), value);
+    var valueArr = [2,4,8,16];
+	var value = valueArr[Math.round(Math.random()*(valueArr.length-1))];
+    var tile = new Tile(, value);
 
     this.grid.insertTile(tile);
   }
@@ -189,7 +194,8 @@ GameManager.prototype.move = function (direction) {
   });
 
   if (moved) {
-    this.addDifficultTile();
+    //this.addDifficultTile();
+	this.addRandomTile();
 
     if (!this.movesAvailable()) {
       this.over = true; // Game over!
